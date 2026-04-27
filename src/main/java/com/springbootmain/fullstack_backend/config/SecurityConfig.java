@@ -14,30 +14,32 @@ public class SecurityConfig {
 
     // FIX: Define a real CORS bean — the old cors -> {} did nothing,
     // causing every browser request to be blocked by CORS preflight.
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("http://localhost:3000"));
-        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        config.setAllowedHeaders(List.of("*"));
-        config.setAllowCredentials(true);
+	@Bean
+	public CorsConfigurationSource corsConfigurationSource() {
+	    CorsConfiguration config = new CorsConfiguration();
+	    config.setAllowedOriginPatterns(List.of(
+	        "http://localhost:3000",
+	        "https://corex-management.vercel.app"
+	    ));
+	    config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+	    config.setAllowedHeaders(List.of("*"));
+	    config.setAllowCredentials(true);
 
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", config);
-        return source;
-    }
+	    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+	    source.registerCorsConfiguration("/**", config);
+	    return source;
+	}
 
-    @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        return http
-                .csrf(csrf -> csrf.disable())
-                // FIX: Wire the CORS bean above — previously cors -> {} ignored it
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/**").permitAll()
-                        .requestMatchers("/users/**", "/user/**").permitAll()
-                        .anyRequest().authenticated()
-                )
-                .build();
-    }
+	@Bean
+	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+	    return http
+	            .csrf(csrf -> csrf.disable())
+	            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+	            .authorizeHttpRequests(auth -> auth
+	                    .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+	                    .requestMatchers("/auth/**").permitAll()
+	                    .anyRequest().authenticated()
+	            )
+	            .build();
+	}
 }
