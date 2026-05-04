@@ -1,6 +1,7 @@
 package com.springbootmain.fullstack_backend.config;
 
 import io.jsonwebtoken.*;
+import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.stereotype.Component;
 
@@ -10,19 +11,19 @@ import java.util.Date;
 @Component
 public class JwtUtil {
 
-    // FIX: Use a fixed base64 secret so tokens survive server restarts.
-    // In production, move this to application.properties and use @Value.
-    private static final String SECRET = "YourSuperSecretKeyForJWTMustBe256BitsLongAtLeast!!";
-    private final SecretKey key = Keys.hmacShaKeyFor(SECRET.getBytes());
+    // ✅ Use Base64 encoded secret (must be at least 256 bits)
+    private static final String SECRET = "VGhpc0lzQVN1cGVyU2VjcmV0S2V5Rm9ySldUMjU2Qml0cw==";
 
-    private static final long EXPIRY_MS = 3_600_000; // 1 hour
+    private final SecretKey key = Keys.hmacShaKeyFor(Decoders.BASE64.decode(SECRET));
+
+    private static final long EXPIRY_MS = 1000 * 60 * 60; // 1 hour
 
     public String generateToken(String username) {
         return Jwts.builder()
                 .setSubject(username)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + EXPIRY_MS))
-                .signWith(key)
+                .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
     }
 
@@ -32,7 +33,7 @@ public class JwtUtil {
 
     public boolean isTokenValid(String token) {
         try {
-            getClaims(token); // throws if expired or invalid
+            getClaims(token);
             return true;
         } catch (JwtException | IllegalArgumentException e) {
             return false;
