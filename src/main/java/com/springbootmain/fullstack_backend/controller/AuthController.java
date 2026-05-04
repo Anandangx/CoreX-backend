@@ -9,6 +9,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/auth")
+// ❌ REMOVE @CrossOrigin here
 public class AuthController {
 
     private final JwtUtil jwtUtil;
@@ -23,10 +24,11 @@ public class AuthController {
         String username = data.get("username");
         String password = data.get("password");
 
-        // FIX: Return proper ResponseEntity instead of throwing RuntimeException
-        // which caused a 500 Internal Server Error instead of 401 Unauthorized.
+        System.out.println("LOGIN HIT: " + username);
+
         if ("admin".equals(username) && "1234".equals(password)) {
             String token = jwtUtil.generateToken(username);
+
             return ResponseEntity.ok(Map.of(
                     "token", token,
                     "username", username,
@@ -34,7 +36,6 @@ public class AuthController {
             ));
         }
 
-        // FIX: Return 401 with a JSON body — the frontend reads error.response.data.message
         return ResponseEntity
                 .status(HttpStatus.UNAUTHORIZED)
                 .body(Map.of("message", "Invalid username or password"));
