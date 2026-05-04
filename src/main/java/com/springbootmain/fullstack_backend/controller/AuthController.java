@@ -21,14 +21,16 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Map<String, String> data) {
 
+        System.out.println("FULL DATA: " + data);
+
         String username = data.get("username");
         String password = data.get("password");
 
-        System.out.println("LOGIN HIT: " + username);
+        System.out.println("USERNAME: " + username);
+        System.out.println("PASSWORD: " + password);
 
         if ("admin".equals(username) && "1234".equals(password)) {
             String token = jwtUtil.generateToken(username);
-
             return ResponseEntity.ok(Map.of(
                     "token", token,
                     "username", username,
@@ -36,8 +38,7 @@ public class AuthController {
             ));
         }
 
-        return ResponseEntity
-                .status(HttpStatus.UNAUTHORIZED)
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                 .body(Map.of("message", "Invalid username or password"));
     }
 }
