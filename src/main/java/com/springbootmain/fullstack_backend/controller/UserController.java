@@ -42,21 +42,23 @@ public class UserController {
 
     @PutMapping("/{id}")
     public ResponseEntity<?> update(@RequestBody User u, @PathVariable Long id) {
-        return repo.findById(id).map(existing -> {
+        if (!repo.existsById(id)) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("message", "User not found"));
+        }
 
-            if (u.getName() != null)
-                existing.setName(u.getName());
+        User existing = repo.findById(id).get();
 
-            if (u.getUsername() != null)
-                existing.setUsername(u.getUsername());
+        if (u.getName() != null)
+            existing.setName(u.getName());
 
-            if (u.getEmail() != null)
-                existing.setEmail(u.getEmail());
+        if (u.getUsername() != null)
+            existing.setUsername(u.getUsername());
 
-            return (ResponseEntity<?>) ResponseEntity.ok(repo.save(existing));
+        if (u.getEmail() != null)
+            existing.setEmail(u.getEmail());
 
-        }).orElse(ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(Map.of("message", "User not found")));
+        return ResponseEntity.ok(repo.save(existing));
     }
 
     @DeleteMapping("/{id}")
