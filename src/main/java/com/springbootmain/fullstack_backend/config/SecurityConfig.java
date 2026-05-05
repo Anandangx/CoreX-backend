@@ -9,7 +9,12 @@ import org.springframework.web.cors.*;
 
 import java.util.List;
 
+import org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+
 @Configuration
+@EnableAutoConfiguration(exclude = {UserDetailsServiceAutoConfiguration.class})
 public class SecurityConfig {
 
     private final JwtFilter jwtFilter;
