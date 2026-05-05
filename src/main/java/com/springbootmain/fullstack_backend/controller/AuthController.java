@@ -9,7 +9,6 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/auth")
-// ❌ REMOVE @CrossOrigin here
 public class AuthController {
 
     private final JwtUtil jwtUtil;
@@ -20,14 +19,8 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Map<String, String> data) {
-
-        System.out.println("FULL DATA: " + data);
-
         String username = data.get("username");
         String password = data.get("password");
-
-        System.out.println("USERNAME: " + username);
-        System.out.println("PASSWORD: " + password);
 
         if ("admin".equals(username) && "1234".equals(password)) {
             String token = jwtUtil.generateToken(username);

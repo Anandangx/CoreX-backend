@@ -28,7 +28,6 @@ public class JwtFilter implements Filter {
 
         String path = req.getRequestURI();
 
-        // ✅ Allow public endpoints
         if (path.startsWith("/auth/")) {
             chain.doFilter(request, response);
             return;
@@ -50,12 +49,9 @@ public class JwtFilter implements Filter {
             return;
         }
 
-        // ✅ IMPORTANT: Set authentication in Spring Security
         String username = jwtUtil.extractUsername(token);
-
         UsernamePasswordAuthenticationToken authentication =
                 new UsernamePasswordAuthenticationToken(username, null, Collections.emptyList());
-
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
         chain.doFilter(request, response);

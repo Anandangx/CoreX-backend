@@ -11,12 +11,9 @@ import java.util.Date;
 @Component
 public class JwtUtil {
 
-    // ✅ Use Base64 encoded secret (must be at least 256 bits)
     private static final String SECRET = "VGhpc0lzQVN1cGVyU2VjcmV0S2V5Rm9ySldUMjU2Qml0cw==";
-
     private final SecretKey key = Keys.hmacShaKeyFor(Decoders.BASE64.decode(SECRET));
-
-    private static final long EXPIRY_MS = 1000 * 60 * 60; // 1 hour
+    private static final long EXPIRY_MS = 1000 * 60 * 60;
 
     public String generateToken(String username) {
         return Jwts.builder()
