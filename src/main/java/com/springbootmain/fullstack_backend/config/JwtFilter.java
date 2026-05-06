@@ -26,15 +26,26 @@ public class JwtFilter implements Filter {
         HttpServletRequest req = (HttpServletRequest) request;
         HttpServletResponse res = (HttpServletResponse) response;
 
-        String path = req.getRequestURI();
+        String origin = req.getHeader("Origin");
+        if (origin != null) {
+            res.setHeader("Access-Control-Allow-Origin", origin);
+            res.setHeader("Access-Control-Allow-Credentials", "true");
+            res.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
+            res.setHeader("Access-Control-Allow-Headers", "*");
+        }
 
+        if ("OPTIONS".equalsIgnoreCase(req.getMethod())) {
+            res.setStatus(HttpServletResponse.SC_OK);
+            return;
+        }
+
+        String path = req.getRequestURI();
         if (path.startsWith("/auth/")) {
             chain.doFilter(request, response);
             return;
         }
 
         String auth = req.getHeader("Authorization");
-
         if (auth == null || !auth.startsWith("Bearer ")) {
             res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             res.getWriter().write("{\"error\": \"Missing token\"}");
@@ -42,7 +53,6 @@ public class JwtFilter implements Filter {
         }
 
         String token = auth.substring(7);
-
         if (!jwtUtil.isTokenValid(token)) {
             res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             res.getWriter().write("{\"error\": \"Invalid or expired token\"}");
