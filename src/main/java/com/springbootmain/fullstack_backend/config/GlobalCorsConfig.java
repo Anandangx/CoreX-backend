@@ -18,6 +18,7 @@ public class GlobalCorsConfig {
 
         CorsConfiguration config = new CorsConfiguration();
 
+        // 🔥 OPEN for testing (no credential restrictions)
         config.setAllowedOriginPatterns(List.of("*"));
         config.setAllowedMethods(List.of("GET","POST","PUT","DELETE","OPTIONS"));
         config.setAllowedHeaders(List.of("*"));

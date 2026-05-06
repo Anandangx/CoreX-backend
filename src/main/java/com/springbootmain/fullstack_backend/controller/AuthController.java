@@ -1,6 +1,5 @@
 package com.springbootmain.fullstack_backend.controller;
 
-import com.springbootmain.fullstack_backend.config.JwtUtil;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -10,12 +9,6 @@ import java.util.Map;
 @RequestMapping("/auth")
 public class AuthController {
 
-    private final JwtUtil jwtUtil;
-
-    public AuthController(JwtUtil jwtUtil) {
-        this.jwtUtil = jwtUtil;
-    }
-
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Map<String, String> data) {
 
@@ -23,11 +16,8 @@ public class AuthController {
         String password = data.get("password");
 
         if ("admin".equals(username) && "1234".equals(password)) {
-
-            String token = jwtUtil.generateToken(username);
-
             return ResponseEntity.ok(Map.of(
-                    "token", token
+                    "token", "dummy-token-123"
             ));
         }
 
