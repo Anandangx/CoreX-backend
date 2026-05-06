@@ -28,33 +28,25 @@ public class JwtFilter implements Filter {
 
         String path = req.getRequestURI();
 
-        // ✅ Allow public endpoints (no token required)
         if (path.startsWith("/auth/")) {
             chain.doFilter(request, response);
             return;
         }
 
-        // ✅ Get Authorization header
         String authHeader = req.getHeader("Authorization");
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            res.setContentType("application/json");
-            res.getWriter().write("{\"error\": \"Missing token\"}");
             return;
         }
 
         String token = authHeader.substring(7);
 
-        // ✅ Validate token
         if (!jwtUtil.isTokenValid(token)) {
             res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            res.setContentType("application/json");
-            res.getWriter().write("{\"error\": \"Invalid or expired token\"}");
             return;
         }
 
-        // ✅ Extract user and set authentication
         String username = jwtUtil.extractUsername(token);
 
         UsernamePasswordAuthenticationToken authentication =
@@ -66,7 +58,6 @@ public class JwtFilter implements Filter {
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        // ✅ Continue request
         chain.doFilter(request, response);
     }
 }
