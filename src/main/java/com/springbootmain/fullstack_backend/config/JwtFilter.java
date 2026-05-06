@@ -26,44 +26,47 @@ public class JwtFilter implements Filter {
         HttpServletRequest req = (HttpServletRequest) request;
         HttpServletResponse res = (HttpServletResponse) response;
 
-        String origin = req.getHeader("Origin");
-        if (origin != null) {
-            res.setHeader("Access-Control-Allow-Origin", origin);
-            res.setHeader("Access-Control-Allow-Credentials", "true");
-            res.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
-            res.setHeader("Access-Control-Allow-Headers", "*");
-        }
-
-        if ("OPTIONS".equalsIgnoreCase(req.getMethod())) {
-            res.setStatus(HttpServletResponse.SC_OK);
-            return;
-        }
-
         String path = req.getRequestURI();
+
+        // ✅ Allow public endpoints (no token required)
         if (path.startsWith("/auth/")) {
             chain.doFilter(request, response);
             return;
         }
 
-        String auth = req.getHeader("Authorization");
-        if (auth == null || !auth.startsWith("Bearer ")) {
+        // ✅ Get Authorization header
+        String authHeader = req.getHeader("Authorization");
+
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            res.setContentType("application/json");
             res.getWriter().write("{\"error\": \"Missing token\"}");
             return;
         }
 
-        String token = auth.substring(7);
+        String token = authHeader.substring(7);
+
+        // ✅ Validate token
         if (!jwtUtil.isTokenValid(token)) {
             res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            res.setContentType("application/json");
             res.getWriter().write("{\"error\": \"Invalid or expired token\"}");
             return;
         }
 
+        // ✅ Extract user and set authentication
         String username = jwtUtil.extractUsername(token);
+
         UsernamePasswordAuthenticationToken authentication =
-                new UsernamePasswordAuthenticationToken(username, null, Collections.emptyList());
+                new UsernamePasswordAuthenticationToken(
+                        username,
+                        null,
+                        Collections.emptyList()
+                );
+
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
+        // ✅ Continue request
         chain.doFilter(request, response);
     }
 }
