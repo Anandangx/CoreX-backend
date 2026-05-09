@@ -1,7 +1,5 @@
 package com.springbootmain.fullstack_backend.controller;
 
-import com.springbootmain.fullstack_backend.config.JwtUtil;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -11,29 +9,25 @@ import java.util.Map;
 @RequestMapping("/auth")
 public class AuthController {
 
-    private final JwtUtil jwtUtil;
-
-    public AuthController(JwtUtil jwtUtil) {
-        this.jwtUtil = jwtUtil;
-    }
-
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody Map<String, String> data) {
+    public ResponseEntity<?> login(
+            @RequestBody Map<String, String> body) {
 
-        String username = data.get("username");
-        String password = data.get("password");
+        String username = body.get("username");
+        String password = body.get("password");
 
-        if ("admin".equals(username) && "1234".equals(password)) {
-            String token = jwtUtil.generateToken(username);
+        if ("admin".equals(username)
+                && "1234".equals(password)) {
 
-            return ResponseEntity.ok(Map.of(
-                    "token", token,
-                    "username", username,
-                    "role", "ADMIN"
-            ));
+            return ResponseEntity.ok(
+                    Map.of(
+                            "token",
+                            "sample-jwt-token"
+                    )
+            );
         }
 
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(Map.of("message", "Invalid username or password"));
+        return ResponseEntity.status(401)
+                .body("Invalid credentials");
     }
 }
