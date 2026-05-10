@@ -3,11 +3,9 @@ package com.springbootmain.fullstack_backend.config;
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
-
 import java.io.IOException;
 import java.util.Collections;
 
@@ -27,43 +25,37 @@ public class JwtFilter implements Filter {
         HttpServletRequest req = (HttpServletRequest) request;
         HttpServletResponse res = (HttpServletResponse) response;
 
-        String origin = req.getHeader("Origin");
-        if (origin != null) {
-            res.setHeader("Access-Control-Allow-Origin", origin);
-            res.setHeader("Access-Control-Allow-Credentials", "true");
-            res.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
-            res.setHeader("Access-Control-Allow-Headers", "*");
-        }
-
-        if ("OPTIONS".equalsIgnoreCase(req.getMethod())) {
-            res.setStatus(HttpServletResponse.SC_OK);
-            return;
-        }
-
         String path = req.getRequestURI();
+
+        // 1. Let public auth endpoints pass through immediately
         if (path.startsWith("/auth/")) {
             chain.doFilter(request, response);
             return;
         }
 
+        // 2. Extract the Authorization header
         String auth = req.getHeader("Authorization");
 
         if (auth == null || !auth.startsWith("Bearer ")) {
+            // Only block if it's not a public path and no token is present
             res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            res.setContentType("application/json");
             res.getWriter().write("{\"error\": \"Missing token\"}");
             return;
         }
 
         String token = auth.substring(7);
 
+        // 3. Validate Token
         if (!jwtUtil.isTokenValid(token)) {
             res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            res.setContentType("application/json");
             res.getWriter().write("{\"error\": \"Invalid or expired token\"}");
             return;
         }
 
+        // 4. Set Security Context
         String username = jwtUtil.extractUsername(token);
-
         UsernamePasswordAuthenticationToken authentication =
                 new UsernamePasswordAuthenticationToken(username, null, Collections.emptyList());
 
